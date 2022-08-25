@@ -1,82 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Is Brenda Home?</title>
     <style>
-        html {
-            height: 100%
-        }
+      html {
+        height: 100%;
+      }
 
-        body {
-            height: 100%;
-            border: 0;
-            margin: 0;
-        }
+      body {
+        height: 100%;
+        border: 0;
+        margin: 0;
+      }
 
-        #container {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font: 3em sans-serif;
-            text-align: center;
-        }
+      #container {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 3em sans-serif;
+        text-align: center;
+      }
 
-        .home {
-            background: #b1ed83;
-        }
+      .home {
+        background: #b1ed83;
+      }
 
-        .away {
-            background: #ffbb9c;
-        }
+      .away {
+        background: #ffbb9c;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="container">
-        <p id="status">loading...</p>
+      <p id="status">loading...</p>
     </div>
     <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
 
-        // Add Firebase products that you want to use
-        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore.js'
+      // Add Firebase products that you want to use
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+      } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCeC10l1RvxYCd08bkJWMfYWN7MyIGUSEw",
-            authDomain: "lawrence-homebirth.firebaseapp.com",
-            projectId: "lawrence-homebirth",
-            storageBucket: "lawrence-homebirth.appspot.com",
-            messagingSenderId: "1031212041802",
-            appId: "1:1031212041802:web:56e12a6868831dc61348b3"
-        };
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCeC10l1RvxYCd08bkJWMfYWN7MyIGUSEw",
+        authDomain: "lawrence-homebirth.firebaseapp.com",
+        projectId: "lawrence-homebirth",
+        storageBucket: "lawrence-homebirth.appspot.com",
+        messagingSenderId: "1031212041802",
+        appId: "1:1031212041802:web:56e12a6868831dc61348b3",
+      };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const statusHtml = document.getElementById('status');
-        const containerHtml = document.getElementById('container');
-        const db = getFirestore(app);
-        const query = await getDoc(doc(db, 'status', 'status'));
-        if (query.exists()) {
-            const isHome = query.data().home;
-            if (isHome) {
-                statusHtml.innerHTML = '&check; Home';
-                containerHtml.className = 'home';
-            } else if (isHome === undefined) {
-                statusHtml.innerHTML = 'error loading';
-            } else {
-                statusHtml.innerHTML = '&cross; Away';
-                containerHtml.className = 'away';
-            }
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const statusHtml = document.getElementById("status");
+      const containerHtml = document.getElementById("container");
+      const db = getFirestore(app);
+      const query = await getDoc(doc(db, "status", "status"));
+      if (query.exists()) {
+        const isHome = query.data().home;
+        if (isHome) {
+          statusHtml.innerHTML = "&check; Home";
+          containerHtml.className = "home";
+        } else if (isHome === undefined) {
+          statusHtml.innerHTML = "error loading";
         } else {
-            statusHtml.innerHTML = 'error loading';
+          statusHtml.innerHTML = "&cross; Away";
+          containerHtml.className = "away";
         }
+      } else {
+        statusHtml.innerHTML = "error loading";
+      }
     </script>
-</body>
-
+  </body>
 </html>
