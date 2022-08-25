@@ -44,6 +44,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
 
         // Add Firebase products that you want to use
+        import { GoogleAuthProvider, getAuth, signInWithRedirect } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-auth.js'
         import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore.js'
 
         // Your web app's Firebase configuration
@@ -61,6 +62,10 @@
         const statusHtml = document.getElementById('status');
         const containerHtml = document.getElementById('container');
         const db = getFirestore(app);
+        const auth = getAuth();
+        auth.useDeviceLanguage();
+        const provider = new GoogleAuthProvider();
+        signInWithRedirect(auth, provider);
         const query = await getDocs(collection(db, 'status'));
         query.forEach(status => {
             const isHome = status.data().home;
