@@ -9,13 +9,14 @@
 
 <body>
     <h1>Is Brenda Home?</h1>
+    <p id="status"></p>
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
 
         // Add Firebase products that you want to use
         import { auth } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-auth.js'
-        import { firestore } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore.js'
+        import { firestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore.js'
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -29,6 +30,14 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const statusHtml = document.getElementById('status');
+        const db = firestore(app);
+        statusHtml.setInnerHTML('Loading...');
+        const query = await getDocs(collection(db, 'status'));
+        query.forEach(status => {
+            console.log(status.data());
+            statusHtml.setInnerHTML(status.data());
+        })
     </script>
 </body>
 
