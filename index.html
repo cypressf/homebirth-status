@@ -44,7 +44,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
 
         // Add Firebase products that you want to use
-        import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore.js'
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore.js'
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -61,18 +61,21 @@
         const statusHtml = document.getElementById('status');
         const containerHtml = document.getElementById('container');
         const db = getFirestore(app);
-        const query = await getDocs(collection(db, 'status'));
-        query.forEach(status => {
-            const isHome = status.data().home;
-            console.log(isHome);
+        const query = await getDoc(doc(db, 'status', 'status'));
+        if (query.exists()) {
+            const isHome = query.data().home;
             if (isHome) {
                 statusHtml.innerHTML = '&check; Home';
                 containerHtml.className = 'home';
+            } else if (isHome === undefined) {
+                statusHtml.innerHTML = 'error loading';
             } else {
                 statusHtml.innerHTML = '&cross; Away';
                 containerHtml.className = 'away';
             }
-        })
+        } else {
+            statusHtml.innerHTML = 'error loading';
+        }
     </script>
 </body>
 
