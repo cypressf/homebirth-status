@@ -4,39 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Is Brenda Home?</title>
-    <style>
-      html {
-        height: 100%;
-      }
-
-      body {
-        height: 100%;
-        border: 0;
-        margin: 0;
-      }
-
-      #container {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font: 3em sans-serif;
-        text-align: center;
-      }
-
-      .home {
-        background: #b1ed83;
-      }
-
-      .away {
-        background: #ffbb9c;
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
     <div id="container">
-      <p id="status">loading...</p>
+      <p id="status">...</p>
     </div>
     <script type="module">
       // Import the functions you need from the SDKs you need
@@ -46,7 +19,7 @@
       import {
         getFirestore,
         doc,
-        getDoc,
+        onSnapshot,
       } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore.js";
 
       // Your web app's Firebase configuration
@@ -64,21 +37,25 @@
       const statusHtml = document.getElementById("status");
       const containerHtml = document.getElementById("container");
       const db = getFirestore(app);
-      const query = await getDoc(doc(db, "status", "status"));
-      if (query.exists()) {
-        const isHome = query.data().home;
-        if (isHome) {
-          statusHtml.innerHTML = "&check; Home";
-          containerHtml.className = "home";
-        } else if (isHome === undefined) {
-          statusHtml.innerHTML = "error loading";
-        } else {
-          statusHtml.innerHTML = "&cross; Away";
-          containerHtml.className = "away";
+      const unsubscribe = onSnapshot(
+        doc(db, "status", "status"),
+        { includeMetadataChanges: true },
+        (doc) => {
+          const pending = doc.metadata.hasPendingWrites;
+          const isHome = doc.data().home;
+          if (isHome) {
+            statusHtml.innerHTML =
+              "&check; Home" + (pending ? " (saving)" : "");
+            containerHtml.className = "home";
+          } else if (isHome === undefined) {
+            statusHtml.innerHTML = "error loading";
+          } else {
+            statusHtml.innerHTML =
+              "&cross; Away" + (pending ? " (saving)" : "");
+            containerHtml.className = "away";
+          }
         }
-      } else {
-        statusHtml.innerHTML = "error loading";
-      }
+      );
     </script>
   </body>
 </html>

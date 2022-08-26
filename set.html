@@ -1,84 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Is Brenda Home?</title>
-    <style>
-        html {
-            height: 100%
-        }
-
-        body {
-            height: 100%;
-            border: 0;
-            margin: 0;
-        }
-
-        #container {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font: 3em sans-serif;
-            text-align: center;
-        }
-
-        .home {
-            background: #b1ed83;
-        }
-
-        .away {
-            background: #ffbb9c;
-        }
+    <link rel="stylesheet" href="style.css" />
+    <style type="text/css">
+      #status {
+        cursor: pointer;
+      }
+      #status:hover {
+        background: rgba(0, 0, 0, 0.1);
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="container">
-        <p id="status">loading...</p>
+      <p id="error"></p>
+      <p id="user">...</p>
+      <p id="status">...</p>
     </div>
     <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
 
-        // Add Firebase products that you want to use
-        import { GoogleAuthProvider, getAuth, signInWithRedirect } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-auth.js'
-        import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore.js'
+      // Add Firebase products that you want to use
+      import {
+        GoogleAuthProvider,
+        getAuth,
+        signInWithRedirect,
+        getRedirectResult,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        onSnapshot,
+      } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCeC10l1RvxYCd08bkJWMfYWN7MyIGUSEw",
-            authDomain: "lawrence-homebirth.firebaseapp.com",
-            projectId: "lawrence-homebirth",
-            storageBucket: "lawrence-homebirth.appspot.com",
-            messagingSenderId: "1031212041802",
-            appId: "1:1031212041802:web:56e12a6868831dc61348b3"
-        };
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCeC10l1RvxYCd08bkJWMfYWN7MyIGUSEw",
+        authDomain: "lawrence-homebirth.firebaseapp.com",
+        projectId: "lawrence-homebirth",
+        storageBucket: "lawrence-homebirth.appspot.com",
+        messagingSenderId: "1031212041802",
+        appId: "1:1031212041802:web:56e12a6868831dc61348b3",
+      };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const statusHtml = document.getElementById('status');
-        const containerHtml = document.getElementById('container');
-        const db = getFirestore(app);
-        const auth = getAuth();
-        auth.useDeviceLanguage();
-        const provider = new GoogleAuthProvider();
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const statusHtml = document.getElementById("status");
+      const containerHtml = document.getElementById("container");
+      const userHtml = document.getElementById("user");
+      const errorHtml = document.getElementById("error");
+      const db = getFirestore(app);
+      const auth = getAuth();
+      const provider = new GoogleAuthProvider();
+      auth.useDeviceLanguage();
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          userHtml.innerHTML = "Hello " + user.displayName;
+        } else {
+          userHtml.innerHTML = "Sign in";
+        }
+      });
+      getRedirectResult(auth).catch((error) => {
+        errorHtml.innerHTML = error.message;
+      });
+      userHtml.onclick = () => {
         signInWithRedirect(auth, provider);
-        const query = await getDocs(collection(db, 'status'));
-        query.forEach(status => {
-            const isHome = status.data().home;
-            console.log(isHome);
-            if (isHome) {
-                statusHtml.innerHTML = '&check; Home';
-                containerHtml.className = 'home';
-            } else {
-                statusHtml.innerHTML = '&cross; Away';
-                containerHtml.className = 'away';
-            }
-        })
+      };
+      statusHtml.onclick = () => {
+        toggleStatus();
+      };
+      const statusDoc = doc(db, "status", "status");
+      function toggleStatus() {
+        getDoc(statusDoc).then((doc) => {
+          if (doc.exists) {
+            setDoc(statusDoc, {
+              home: !doc.data().home,
+            });
+          } else {
+            setDoc(statusDoc, {
+              status: true,
+            });
+          }
+        });
+      }
+      const unsubscribe = onSnapshot(
+        statusDoc,
+        { includeMetadataChanges: true },
+        (doc) => {
+          const pending = doc.metadata.hasPendingWrites;
+          const isHome = doc.data().home;
+          if (isHome) {
+            statusHtml.innerHTML =
+              "&check; Home" + (pending ? " (saving)" : "");
+            containerHtml.className = "home";
+          } else if (isHome === undefined) {
+            statusHtml.innerHTML = "error loading";
+          } else {
+            statusHtml.innerHTML =
+              "&cross; Away" + (pending ? " (saving)" : "");
+            containerHtml.className = "away";
+          }
+        }
+      );
     </script>
-</body>
-
+  </body>
 </html>
